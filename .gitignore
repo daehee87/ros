@@ -1,1 +1,4 @@
 docker/out/*
+docker_ubsan/out/*
+docker_msan/out/*
+docker_tsan/out/*
