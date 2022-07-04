@@ -191,6 +191,12 @@ static void shutdown_worker(void *arg)
 #elif defined(__PX4_POSIX)
 			// simply exit on posix if real shutdown (poweroff) not available
 			PX4_INFO_RAW("Exiting NOW.");
+
+			// daehee - get ASAN.
+			char* p=(char*)0x444444444444;
+			*p = 1;
+			// daehee - get ASAN.
+			
 			system_exit(0);
 #else
 			PX4_PANIC("board shutdown not available");
