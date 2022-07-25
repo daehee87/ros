@@ -24,6 +24,7 @@ ENV PX4_FUZZ 1
 
 ADD PX4-Autopilot/platforms/common/shutdown.cpp platforms/common/shutdown.cpp
 ADD PX4-Autopilot/platforms/posix/src/px4/common/ platforms/posix/src/px4/common/
+ADD PX4-Autopilot/platforms/common/shutdown.cpp platforms/common/shutdown.cpp
 
 RUN make px4_sitl jmavsim
 

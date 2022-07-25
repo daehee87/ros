@@ -78,10 +78,10 @@ def packetSender(msgid=0, iteration=1):
                     time.sleep(0.2)
 
                     if count % 1000 == 0:
-                        print('Packet generator running... %d'.format(count))
-                    if count % 100000 == 0:
+                        print('Packet generator running... %d'%(count))
+                    if count % 10000 == 0:
                         print('Cleanup corpus...')
-                        os.system('rm -rf %s/*'.format(seed_folder))
+                        os.system('rm -rf %s/*'%(seed_folder))
         
 def OnFuzz():
     packetSender()
