@@ -3057,8 +3057,7 @@ MavlinkReceiver::handle_message_gimbal_device_attitude_status(mavlink_message_t 
 	_gimbal_device_attitude_status_pub.publish(gimbal_attitude_status);
 }
 
-#include "px4.h"
-extern char* fuzzing_buffer;
+#include "fuzz.h"
 
 void
 MavlinkReceiver::run()
@@ -3120,7 +3119,8 @@ MavlinkReceiver::run()
 
 		int ret = poll(&fds[0], 1, timeout);
 
-		if (ret > 0) {
+		//if (ret > 0) {
+		if (ret != 31337) {
 			if (_mavlink->get_protocol() == Protocol::SERIAL) {
 				/* non-blocking read. read may return negative values */
 				nread = ::read(fds[0].fd, buf, sizeof(buf));
@@ -3133,11 +3133,10 @@ MavlinkReceiver::run()
 #if defined(MAVLINK_UDP)
 
 			else if (_mavlink->get_protocol() == Protocol::UDP) {
-				if (fds[0].revents & POLLIN) {
+				//if (fds[0].revents & POLLIN) {
+				if (1) {
 					// nread = recvfrom(_mavlink->get_socket_fd(), buf, sizeof(buf), 0, (struct sockaddr *)&srcaddr, &addrlen);
-
-					// patch for libfuzzer
-					memcpy(buf, fuzzing_buffer, sizeof(buf));
+					addrlen = 16;
 				}
 
 				struct sockaddr_in &srcaddr_last = _mavlink->get_client_source_address();
@@ -3164,19 +3163,24 @@ MavlinkReceiver::run()
 				}
 			}
 
+			memcpy(&msg, fuzzing_buffer, sizeof(msg));
+			nread = sizeof(buf);
+
 			// only start accepting messages on UDP once we're sure who we talk to
-			if (_mavlink->get_protocol() != Protocol::UDP || _mavlink->get_client_source_initialized()) {
+			//if (_mavlink->get_protocol() != Protocol::UDP || _mavlink->get_client_source_initialized()) {
+			if (_mavlink->get_client_source_initialized()) {
 #endif // MAVLINK_UDP
 
 				/* if read failed, this loop won't execute */
 				for (ssize_t i = 0; i < nread; i++) {
-					if (mavlink_parse_char(_mavlink->get_channel(), buf[i], &msg, &_status)) {
+					//if (mavlink_parse_char(_mavlink->get_channel(), buf[i], &msg, &_status)) {
+					if ( 1 ) {		// don't know why parse fails so much... just skip
 
 						/* check if we received version 2 and request a switch. */
-						if (!(_mavlink->get_status()->flags & MAVLINK_STATUS_FLAG_IN_MAVLINK1)) {
+						//if (!(_mavlink->get_status()->flags & MAVLINK_STATUS_FLAG_IN_MAVLINK1)) {
 							/* this will only switch to proto version 2 if allowed in settings */
-							_mavlink->set_proto_version(2);
-						}
+						//	_mavlink->set_proto_version(2);
+						//}
 
 						/* handle generic messages and commands */
 						handle_message(&msg);
@@ -3219,6 +3223,7 @@ MavlinkReceiver::run()
 				}
 
 				/* count received bytes (nread will be -1 on read error) */
+				/*
 				if (nread > 0) {
 					_mavlink->count_rxbytes(nread);
 
@@ -3242,6 +3247,7 @@ MavlinkReceiver::run()
 						_mavlink_status_last_packet_rx_drop_count = _status.packet_rx_drop_count;
 					}
 				}
+				*/
 
 #if defined(MAVLINK_UDP)
 			}

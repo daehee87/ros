@@ -43,7 +43,7 @@
 #include "px4_daemon/client.h"
 #include "px4_daemon/server.h"
 #include "px4_daemon/pxh.h"
-#include "px4.h"
+#include "fuzz.h"
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -55,6 +55,7 @@
 #define PATH_MAX 1024
 #endif
 
+char fuzzing_buffer[4096];
 
 namespace px4
 {
@@ -88,7 +89,11 @@ void initialize_fake_px4_once()
 
 	px4::init_once();
 	px4::init(0, nullptr, "px4");
-
+	px4_daemon::Pxh pxh;
+	pxh.process_line("uorb start", true);
+	PX4_WARN("start mavlink now.");    
+        pxh.process_line("mavlink start -x -o 14540 -r 4000000", true);
+        pxh.process_line("mavlink boot_complete", true);
 }
 
 /*
@@ -151,7 +156,7 @@ void send_mavlink(const uint8_t *data, const size_t size)
 	}
 
 	mavlink_message_t message {};
-	uint8_t buffer[MAVLINK_MAX_PACKET_LEN] {};
+	//uint8_t buffer[MAVLINK_MAX_PACKET_LEN] {};
 
 	mavlink_file_transfer_protocol_t ftp {};
 
@@ -162,7 +167,7 @@ void send_mavlink(const uint8_t *data, const size_t size)
 		memcpy(reinterpret_cast<void *>(&message), data + i, copy_len);
 
 		message.magic = MAVLINK_STX_MAVLINK1;
-		message.seq = 0;
+		message.seq = 255;
 		message.sysid = 255;
 		message.compid = 255;
 		message.msgid = MAVLINK_MSG_ID_FILE_TRANSFER_PROTOCOL;
@@ -171,14 +176,16 @@ void send_mavlink(const uint8_t *data, const size_t size)
 		ftp.target_system = 0;
 		ftp.target_component = 0;
 		PayloadHeader *payload = reinterpret_cast<PayloadHeader *>(&(ftp.payload[0]));
-		payload->opcode = kCmdListDirectory;
-		memcpy(payload->data, "/tmp/", 6);	// LIST /tmp/
+		payload->opcode = 3; //kCmdListDirectory;	
+		payload->seq_number++;
+		payload->size = 6;	// strlen(/tmp/) + 1;	
+		memcpy(payload->data, "/tmp/", 6);	// LIST /tmp/		
 		memcpy(ftp.payload, payload, 251);
 		
 		// #define MAVLINK_MSG_ID_FILE_TRANSFER_PROTOCOL_LEN 254
 		memcpy(message.payload64, &ftp, 254);
 
-		const ssize_t buffer_len = mavlink_msg_to_send_buffer(buffer, &message);
+		//const ssize_t buffer_len = mavlink_msg_to_send_buffer(buffer, &message);
 
 		struct sockaddr_in dest_addr {};
 		dest_addr.sin_family = AF_INET;
@@ -186,7 +193,8 @@ void send_mavlink(const uint8_t *data, const size_t size)
 		inet_pton(AF_INET, "127.0.0.1", &dest_addr.sin_addr.s_addr);
 		dest_addr.sin_port = htons(14556);
 
-		memcpy(fuzzing_buffer, buffer, buffer_len);
+		memcpy(fuzzing_buffer, &message, sizeof(message));
+		
 		//if (sendto(socket_fd, buffer, buffer_len, 0, reinterpret_cast<sockaddr *>(&dest_addr),
 		//	   sizeof(dest_addr)) != buffer_len) {
 		//	PX4_ERR("sendto error: %s", strerror(errno));

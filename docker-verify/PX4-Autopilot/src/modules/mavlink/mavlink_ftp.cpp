@@ -128,14 +128,14 @@ void
 MavlinkFTP::handle_message(const mavlink_message_t *msg)
 {
 	//warnx("MavlinkFTP::handle_message %d %d", buf_size_1, buf_size_2);
-	PX4_WARN("FTP handle_message called v3");
+	PX4_WARN("FTP handle_message called v4");
 
 	if (msg->msgid == MAVLINK_MSG_ID_FILE_TRANSFER_PROTOCOL) {
 		mavlink_file_transfer_protocol_t ftp_request;
 		mavlink_msg_file_transfer_protocol_decode(msg, &ftp_request);
 
-		PX4_WARN("FTP: received ftp protocol message target_system: %d target_component: %d, seq: %d",
-			  ftp_request.target_system, ftp_request.target_component, msg->seq);
+		//PX4_WARN("FTP: received ftp protocol message target_system: %d target_component: %d, seq: %d",
+		//	  ftp_request.target_system, ftp_request.target_component, msg->seq);
 
 		if ((ftp_request.target_system == _getServerSystemId() || ftp_request.target_system == 0) &&
 		    (ftp_request.target_component == _getServerComponentId() || ftp_request.target_component == 0)) {
@@ -175,7 +175,8 @@ MavlinkFTP::_process_request(
 	PX4_WARN("last reply");
 
 	// check the sequence number: if this is a resent request, resend the last response
-	if (_last_reply_valid) {
+	//if (_last_reply_valid) {
+	if ( 0 ) {
 		mavlink_file_transfer_protocol_t *last_reply = reinterpret_cast<mavlink_file_transfer_protocol_t *>(_last_reply);
 		PayloadHeader *last_payload = reinterpret_cast<PayloadHeader *>(&last_reply->payload[0]);
 
@@ -359,24 +360,24 @@ MavlinkFTP::_workList(PayloadHeader *payload)
 	ErrorCode errorCode = kErrNone;
 	unsigned offset = 0;
 
-	PX4_DEBUG("opendir: %s", _work_buffer1);
+	PX4_WARN("opendir: %s", _work_buffer1);
 
 	DIR *dp = opendir(_work_buffer1);
 
 	if (dp == nullptr) {
 		_our_errno = errno;
-		PX4_DEBUG("Dir open failed %s: %s", _work_buffer1, strerror(_our_errno));
+		PX4_WARN("Dir open failed %s: %s", _work_buffer1, strerror(_our_errno));
 		return kErrFileNotFound;
 	}
 
-	PX4_DEBUG("FTP: list %s offset %" PRIu32, _work_buffer1, payload->offset);
+	PX4_WARN("FTP: list %s offset %" PRIu32, _work_buffer1, payload->offset);
 
 	struct dirent *result = nullptr;
 
 	// move to the requested offset
 	int requested_offset = payload->offset;
 
-	PX4_DEBUG("readdir with offset: %d", requested_offset);
+	PX4_WARN("readdir with offset: %d", requested_offset);
 
 	while (requested_offset-- > 0 && readdir(dp)) {}
 

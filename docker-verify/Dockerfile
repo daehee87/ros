@@ -31,7 +31,7 @@ ENV PX4_FUZZ 1
 
 ADD PX4-Autopilot/src/modules/mavlink/ src/modules/mavlink/
 ADD PX4-Autopilot/platforms/posix/src/px4/common/ platforms/posix/src/px4/common/
-
+ADD PX4-Autopilot/src/include/ src/include/
 RUN make px4_sitl jmavsim
 
 ADD init.sh /
