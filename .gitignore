@@ -1,5 +1,6 @@
 docker/out/*
 docker-ubsan/out/*
 docker-msan/out/*
+docker-asan/out/*
 docker-tsan/out/*
 docker-verify/out/*
