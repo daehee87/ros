@@ -390,7 +390,7 @@ MavlinkFTP::_workList(PayloadHeader *payload)
 			_our_errno = errno;
 
 			if (_our_errno) {
-				PX4_WARN("readdir failed: %s", strerror(_our_errno));
+				PX4_DEBUG("readdir failed: %s", strerror(_our_errno));
 				payload->data[offset++] = kDirentSkip;
 				*((char *)&payload->data[offset]) = '\0';
 				offset++;

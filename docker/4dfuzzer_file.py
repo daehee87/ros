@@ -79,7 +79,7 @@ def packetSender(msgid=0, iteration=1):
 
                     if count % 1000 == 0:
                         print('Packet generator running... %d'%(count))
-                    if count % 100000 == 0:
+                    if count % 10000 == 0:
                         print('Cleanup corpus...')
                         os.system('rm -rf %s/*'%(seed_folder))
         

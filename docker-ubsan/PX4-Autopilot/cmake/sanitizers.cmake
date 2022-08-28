@@ -135,14 +135,18 @@ elseif (CMAKE_BUILD_TYPE STREQUAL FuzzTesting)
 	message(STATUS "FuzzTesting enabled")
 
 	add_compile_options(
+		-O1
 		-g3
-		-fsanitize=fuzzer
+		-fsanitize=fuzzer,undefined
+                -fno-omit-frame-pointer # Leave frame pointers. Allows the fast unwinder to function properly.
+                -fno-common # Do not treat global variable in C as common variables (allows ASan to instrument them)
+                -fno-optimize-sibling-calls # disable inlining and and tail call elimination for perfect stack traces
 		-DFUZZTESTING
 	)
 
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=fuzzer $ENV{LIB_FUZZING_ENGINE}" CACHE INTERNAL "" FORCE)
-	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=fuzzer $ENV{LIB_FUZZING_ENGINE}" CACHE INTERNAL "" FORCE)
-	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=fuzzer $ENV{LIB_FUZZING_ENGINE}" CACHE INTERNAL "" FORCE)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=fuzzer,undefined $ENV{LIB_FUZZING_ENGINE}" CACHE INTERNAL "" FORCE)
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=fuzzer,undefined $ENV{LIB_FUZZING_ENGINE}" CACHE INTERNAL "" FORCE)
+	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=fuzzer,undefined $ENV{LIB_FUZZING_ENGINE}" CACHE INTERNAL "" FORCE)
 
 
 	function(sanitizer_fail_test_on_error test_name)
