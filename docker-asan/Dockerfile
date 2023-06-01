@@ -22,8 +22,8 @@ RUN git clone https://github.com/pwndbg/pwndbg
 WORKDIR /pwndbg
 RUN ./setup.sh
 WORKDIR /PX4-Autopilot
+RUN git checkout d04a91a3ae223f8b749699dd69a59124bc122a3b
 
-WORKDIR /PX4-Autopilot
 ENV CC clang
 ENV CXX clang
 # build system only allow to select one option among FUZZ, ASAN, UBSAN....
@@ -34,6 +34,7 @@ ADD PX4-Autopilot/cmake/sanitizers.cmake cmake/sanitizers.cmake
 ADD PX4-Autopilot/src/modules/mavlink/ src/modules/mavlink/
 ADD PX4-Autopilot/platforms/posix/src/px4/common/ platforms/posix/src/px4/common/
 ADD PX4-Autopilot/src/include/ src/include/
+RUN ls
 RUN make px4_sitl jmavsim
 
 ADD init.sh /

@@ -22,6 +22,7 @@ RUN git clone https://github.com/pwndbg/pwndbg
 WORKDIR /pwndbg
 RUN ./setup.sh
 WORKDIR /PX4-Autopilot
+RUN git checkout d04a91a3ae223f8b749699dd69a59124bc122a3b
 
 WORKDIR /PX4-Autopilot
 ENV CC clang
